@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function listRoleAll(params) {
   return request({
-    url: '/authorization/v1/roleAll',
+    url: '/admin/v1/authorization/roleAll',
     method: 'get',
     params
   })
@@ -10,7 +10,7 @@ export function listRoleAll(params) {
 
 export function listRole(params) {
   return request({
-    url: '/authorization/v1/role',
+    url: '/admin/v1/authorization/roles',
     method: 'get',
     params
   })
@@ -18,7 +18,7 @@ export function listRole(params) {
 
 export function createRole(data) {
   return request({
-    url: '/authorization/v1/role',
+    url: '/admin/v1/authorization/role',
     method: 'post',
     data
   })
@@ -26,7 +26,7 @@ export function createRole(data) {
 
 export function updateRole(data) {
   return request({
-    url: '/authorization/v1/role',
+    url: '/admin/v1/authorization/role',
     method: 'put',
     data
   })
@@ -34,7 +34,7 @@ export function updateRole(data) {
 
 export function deleteRole(params) {
   return request({
-    url: '/authorization/v1/role',
+    url: '/admin/v1/authorization/role',
     method: 'delete',
     params
   })
@@ -42,7 +42,7 @@ export function deleteRole(params) {
 
 export function saveRoleMenu(data) {
   return request({
-    url: '/authorization/v1/roleMenu',
+    url: '/admin/v1/authorization/roleMenu',
     method: 'post',
     data
   })
@@ -50,7 +50,7 @@ export function saveRoleMenu(data) {
 
 export function getRolePolicies(params) {
   return request({
-    url: '/authorization/v1/getPolicies',
+    url: '/admin/v1/authorization/getPolicies',
     method: 'get',
     params
   })
@@ -58,7 +58,7 @@ export function getRolePolicies(params) {
 
 export function saveRolePolicies(data) {
   return request({
-    url: '/authorization/v1/updatePolicies',
+    url: '/admin/v1/authorization/updatePolicies',
     method: 'post',
     data
   })
@@ -66,7 +66,7 @@ export function saveRolePolicies(data) {
 
 export function getRoleMenuBtn(params) {
   return request({
-    url: '/authorization/v1/roleMenuBtn',
+    url: '/admin/v1/authorization/roleMenuBtn',
     method: 'get',
     params
   })
@@ -74,7 +74,7 @@ export function getRoleMenuBtn(params) {
 
 export function setRoleMenuBtn(data) {
   return request({
-    url: '/authorization/v1/roleMenuBtn',
+    url: '/admin/v1/authorization/roleMenuBtn',
     method: 'post',
     data
   })
@@ -82,7 +82,7 @@ export function setRoleMenuBtn(data) {
 
 export function saveAdministratorRole(data) {
   return request({
-    url: '/authorization/v1/setRolesForUser',
+    url: '/admin/v1/authorization/setRolesForUser',
     method: 'post',
     data
   })
@@ -90,7 +90,7 @@ export function saveAdministratorRole(data) {
 
 export function getAdministratorRole(params) {
   return request({
-    url: '/authorization/v1/getRolesForUser',
+    url: '/admin/v1/authorization/getRolesForUser',
     method: 'get',
     params
   })
@@ -98,7 +98,7 @@ export function getAdministratorRole(params) {
 
 export function getRoleAdministrator(params) {
   return request({
-    url: '/authorization/v1/getUsersForRole',
+    url: '/admin/v1/authorization/getUsersForRole',
     method: 'get',
     params
   })
@@ -106,7 +106,7 @@ export function getRoleAdministrator(params) {
 
 export function deleteRoleAdministrator(params) {
   return request({
-    url: '/authorization/v1/deleteRoleForUser',
+    url: '/admin/v1/authorization/deleteRoleForUser',
     method: 'delete',
     params
   })

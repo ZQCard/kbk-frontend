@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function listAdministrator(params) {
   return request({
-    url: '/admin/v1/getAdministrators',
+    url: '/admin/v1/administrators',
     method: 'get',
     params
   })

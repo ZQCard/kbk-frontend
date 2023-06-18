@@ -73,8 +73,8 @@
           <el-input v-model="temp.name" />
         </el-form-item>
         <el-form-item label="是否隐藏" prop="hidden">
-          <el-radio v-model="temp.hidden" label="1">是</el-radio>
-          <el-radio v-model="temp.hidden" label="0">否</el-radio>
+          <el-radio v-model="temp.hidden" label="true">是</el-radio>
+          <el-radio v-model="temp.hidden" label="false">否</el-radio>
         </el-form-item>
         <el-form-item label="前端文件路径" prop="component">
           <el-input v-model="temp.component" placeholder="/xxx/xxx/index"/>
@@ -122,8 +122,8 @@ export default {
   filters: {
     hiddenInfoFilter(hidden) {
       const hiddenMap = {
-        1: '隐藏',
-        0: '显示'
+        true: '隐藏',
+        false: '显示'
       }
       return hiddenMap[hidden]
     },
@@ -189,7 +189,7 @@ export default {
     getList() {
       this.listLoading = true
       getBaseMenuTree().then(response => {
-        this.list = response.data.list
+        this.list = response.list
       })
     },
     resetTemp() {
@@ -229,6 +229,10 @@ export default {
       this.temp.menuBtns = this.menuBtns
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
+          let req = this.temp
+          req.hidden = req.hidden == "1" ? true : false
+          req.parentIds = req.parentIds.join(',')
+          
           createMenu(this.temp).then(response => {
             this.getList()
             this.dialogFormVisible = false
@@ -244,6 +248,7 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
+      this.temp.hidden = row.hidden ? "true" : "false"
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       if (row.parentId == "0") {
@@ -256,12 +261,14 @@ export default {
       })
     },
     updateData() {
-      this.temp.parentId = this.temp.parentIds[this.temp.parentIds.length - 1]
-      this.temp.menuBtns = this.menuBtns
+      let req = this.temp
+      req.hidden = req.hidden == "1" ? true : false
+      req.parentIds = this.temp.parentIds.join(',')
+      req.parentId = this.temp.parentIds[this.temp.parentIds.length - 1]
+      req.menuBtns = this.menuBtns
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          const tempData = Object.assign({}, this.temp)
-          updateMenu(tempData).then(() => {
+          updateMenu(req).then(() => {
             this.getList()
             this.dialogFormVisible = false
             this.$notify({
@@ -339,9 +346,9 @@ export default {
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
       // 删除首个根元素
-      var tmpParentIds = row.parentIds
+      var tmpParentIds = row.parentIds.split(",")
       if (row.parentIds[0] == "0") {
-        tmpParentIds.pop()
+        tmpParentIds.shift()
       }
       tmpParentIds.push(row.id + '')
       this.temp.parentIds = tmpParentIds

@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getApiAll(params) {
   return request({
-    url: '/authorization/v1/apiAll',
+    url: '/admin/v1/authorization/apiAll',
     method: 'get',
     params
   })
@@ -10,7 +10,7 @@ export function getApiAll(params) {
 
 export function listApi(params) {
   return request({
-    url: '/authorization/v1/api',
+    url: '/admin/v1/authorization/api',
     method: 'get',
     params
   })
@@ -18,7 +18,7 @@ export function listApi(params) {
 
 export function createApi(data) {
   return request({
-    url: '/authorization/v1/api',
+    url: '/admin/v1/authorization/api',
     method: 'post',
     data
   })
@@ -26,7 +26,7 @@ export function createApi(data) {
 
 export function updateApi(data) {
   return request({
-    url: '/authorization/v1/api',
+    url: '/admin/v1/authorization/api',
     method: 'put',
     data
   })
@@ -34,7 +34,7 @@ export function updateApi(data) {
 
 export function deleteApi(params) {
   return request({
-    url: '/authorization/v1/api',
+    url: '/admin/v1/authorization/api',
     method: 'delete',
     params
   })

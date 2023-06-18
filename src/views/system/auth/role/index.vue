@@ -23,9 +23,6 @@
           <el-button type="warning" size="mini" @click="openDrawer(row)" v-if="checkBtnPermission('setRolePermission')">
             设置权限
           </el-button>
-          <el-button type="primary" size="mini" @click="handleChildRole(row)" v-if="checkBtnPermission('createRole')">
-            新增子角色
-          </el-button>
           <el-button type="primary" size="mini" @click="handleUpdate(row)" v-if="checkBtnPermission('updateRole')">
             编辑
           </el-button>
@@ -43,13 +40,7 @@
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px"
         style="width: 500px; margin-left:50px;">
         <el-form-item label="ID" prop="id" v-if="dialogStatus === 'update'">
-          <el-input v-model="temp.id" />
-        </el-form-item>
-        <el-form-item label="父级角色" prop="parentIds">
-          <el-cascader v-model="temp.parentIds" :options="roleOptions" style="width:100%"
-            :props="{ checkStrictly: true, label: 'name', value: 'id', emitPath: 'true' }" :show-all-levels="false"
-            @change="handleChange">
-          </el-cascader>
+          <el-input v-model="temp.id" readonly />
         </el-form-item>
         <el-form-item label="角色名称" prop="name">
           <el-input v-model="temp.name" />
@@ -201,8 +192,6 @@ export default {
       temp: {
         id: undefined,
         name: undefined,
-        parentId: undefined,
-        parentIds: undefined,
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -223,24 +212,21 @@ export default {
   },
   methods: {
     checkBtnPermission,
-    handleChange(value) {
-      this.temp.parentIds = value
-    },
     getList() {
       this.listLoading = true
       listRole(this.listQuery).then(response => {
-        this.list = response.data.list
+        this.list = response.list
         this.listLoading = false
       })
     },
     getMenuData() {
       getBaseMenuTree().then(response => {
-        this.menuData = response.data.list
+        this.menuData = response.list
       })
     },
     getApiData() {
       getApiAll().then(response => {
-        this.apiData = this.buildApiTree(response.data.list)
+        this.apiData = this.buildApiTree(response.list)
       })
     },
     buildApiTree(apis) {
@@ -280,40 +266,18 @@ export default {
       this.temp = {
         id: undefined,
         name: undefined,
-        parentId: undefined,
-        parentIds: undefined,
       }
     },
-    handleCreate(parentId) {
+    handleCreate() {
       this.resetTemp()
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
-      if (parentId == 0) {
-        this.temp.parentIds = [0]
-      }
-      this.setOptions()
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
     },
-    handleChildRole(row) {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogFormVisible = true
-      // 删除首个根元素
-      var tmpParentIds = row.parentIds
-      if (row.parentIds[0] == "0") {
-        tmpParentIds.pop()
-      }
-      tmpParentIds.push(row.id + '')
-      this.temp.parentIds = tmpParentIds
-      this.setOptions()
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-    },
+   
     createData() {
-      this.temp.parentId = this.temp.parentIds[this.temp.parentIds.length - 1]
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           createRole(this.temp).then(response => {
@@ -333,16 +297,11 @@ export default {
       this.temp = Object.assign({}, row) // copy obj
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
-      if (row.parentId == "0") {
-        this.temp.parentIds = [0]
-      }
-      this.setOptions()
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
     },
     updateData() {
-      this.temp.parentId = this.temp.parentIds[this.temp.parentIds.length - 1]
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
@@ -375,7 +334,7 @@ export default {
       this.roleAdministratorVisible = true
       this.currentRole = row.name
       getRoleAdministrator({ role: row.name }).then(response => {
-        this.roleAdministratorList = response.data.users
+        this.roleAdministratorList = response.users
       })
     },
     removeRole(username, index) {
@@ -383,50 +342,17 @@ export default {
         this.roleAdministratorList.splice(index, 1)
       })
     },
-    setOptions() {
-      this.roleOptions = [
-        {
-          id: 0,
-          name: '根角色'
-        }
-      ]
-      this.setRoleOptions(this.list, this.roleOptions)
-    },
-    setRoleOptions(dataList, optionsData) {
-      this.temp.id = String(this.temp.id)
-      dataList &&
-        dataList.forEach(item => {
-          if (item.children && item.children.length) {
-            const option = {
-              id: item.id,
-              name: item.name,
-              children: []
-            }
-            this.setRoleOptions(
-              item.children,
-              option.children,
-            )
-            optionsData.push(option)
-          } else {
-            const option = {
-              id: item.id,
-              name: item.name,
-            }
-            optionsData.push(option)
-          }
-        })
-    },
     openDrawer(row) {
       this.currentRow = row
       this.drawer = true
       getRoleMenu({ role: row.name }).then(response => {
         this.$refs.menuData.setCheckedKeys([]);
         this.tmpMenuCheckedIds = [];
-        this.setRoleMenuChecked(response.data.list)
+        this.setRoleMenuChecked(response.list)
         this.menuCheckedIds = this.tmpMenuCheckedIds
       })
       getRolePolicies({ role: row.name }).then(response => {
-        const apis = response.data.policyRules
+        const apis = response.policyRules
         this.tmpApiCheckedIds = [];
         this.$refs.apiData.setCheckedKeys([]);
         apis.forEach(item => {
@@ -507,7 +433,7 @@ export default {
       // 获取当前角色拥有的菜单按钮
       getRoleMenuBtn({ role_id: this.currentRow.id, menu_id: node.data.id }).then(response => {
         this.btnData.forEach(item => {
-          response.data.list.some(buttonInfo => {
+          response.list.some(buttonInfo => {
             this.$nextTick(() => {
               if (item.identifier === buttonInfo.identifier) {
                 this.$refs.multipleTable.toggleRowSelection(item, true)

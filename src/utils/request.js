@@ -2,58 +2,57 @@ import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
+import { get } from 'lodash'
 
-// create an axios instance
+// 创建 axios 实例
 const service = axios.create({
-  baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
-  // withCredentials: true, // send cookies when cross-domain requests
-  timeout: 5000 // request timeout
-})
+  baseURL: process.env.VUE_APP_BASE_API, // URL = 基础URL + 请求URL
+  timeout: 5000, // 请求超时时间
+});
 
-// request interceptor
+// 请求拦截器
 service.interceptors.request.use(
-  config => {
-    // do something before request is sent
-
+  (config) => {
+    // 在发送请求之前可以进行一些处理，例如添加 token 等
     if (store.getters.token) {
-      config.headers['Authorization'] = 'Bearer ' + getToken()
+      config.headers['Authorization'] = 'Bearer ' + getToken();
     }
-    return config
+    return config;
   },
-  error => {
-    // do something with request error
-    console.log(error) // for debug
-    return Promise.reject(error)
+  (error) => {
+    // 处理请求错误
+    console.log(error); // 调试用
+    return Promise.reject(error);
   }
-)
+);
 
-// response interceptor
+// 响应拦截器
 service.interceptors.response.use(
-  /**
-   * If you want to get http information such as headers or status
-   * Please return  response => response
-  */
+  (response) => {
+    const { data, status } = response;
 
-  /**
-   * Determine the request status by custom code
-   * Here is just an example
-   * You can also judge the status by HTTP Status Code
-   */
-  response => {
-    const res = response.data
-
-    // if the custom code is not 20000, it is judged as an error.
-    if (res.code !== 0) {
+    // 根据 HTTP 状态码进行处理
+    if (status === 200) {
+      // 处理正常的 200 状态码
+      return data;
+    } else {
+      // 处理非 200 状态码
       Message({
-        message: res.message || 'Error',
+        message: '请求错误，请重试',
         type: 'error',
-        duration: 5 * 1000
-      })
-
-      // 无效token
-      if (res.code === 40001 || res.code === 40002 || res.code === 40003) {
-        // to re-login
-        MessageBox.confirm('您已退出登录，如果需要请重新登录或稍后再试', '退出登录', {
+        duration: 5 * 1000,
+      });
+      return Promise.reject(new Error('请求错误'));
+    }
+  },
+  (error) => {
+    // 处理响应错误
+    const response = get(error, 'response');
+    if (response) {
+      // 获取响应相关信息，并根据 HTTP 状态码进行处理
+      const status = response.status;
+      if (status === 401 || status === 403) {
+        MessageBox.confirm('暂无权限', '退出登录', {
           confirmButtonText: '重新登录',
           cancelButtonText: '取消',
           type: 'warning'
@@ -62,21 +61,33 @@ service.interceptors.response.use(
             location.reload()
           })
         })
+      }  else {
+        // 处理其他类型的错误
+        if (response.data.message != "") {
+          Message({
+            message: response.data.message,
+            type: 'error',
+            duration: 5 * 1000,
+          });
+        }else{
+          Message({
+            message: '请求失败，请重试',
+            type: 'error',
+            duration: 5 * 1000,
+          });
+        }
+        
       }
-      return Promise.reject(new Error(res.message || 'Error'))
     } else {
-      return res
+      // 处理其他类型的错误
+      Message({
+        message: '请求失败，请重试',
+        type: 'error',
+        duration: 5 * 1000,
+      });
     }
-  },
-  error => {
-    console.log('err' + error) // for debug
-    Message({
-      message: error.message,
-      type: 'error',
-      duration: 5 * 1000
-    })
-    return Promise.reject(error)
+    return Promise.reject(error);
   }
-)
+);
 
-export default service
+export default service;

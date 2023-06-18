@@ -52,26 +52,22 @@ const actions = {
   generateRoutes({ commit }, roles) {
     return new Promise(resolve => {
       const loadMenuData = []
+     
       // 先查询后台并返回左侧菜单数据并把数据添加到路由
       getRoleMenu({ role: roles[0] }).then(response => {
-        let data = response
-        if (response.code !== 0) {
-          throw new Error('菜单数据加载异常')
+        let data = response.list
+        Object.assign(loadMenuData, data)
+        const tempAsyncRoutes = Object.assign([], asyncRoutes)
+        generateMenu(tempAsyncRoutes, loadMenuData)
+        let accessedRoutes
+        if (roles.includes('超级管理员')) {
+          accessedRoutes = tempAsyncRoutes || []
         } else {
-          data = response.data.list
-          Object.assign(loadMenuData, data)
-          const tempAsyncRoutes = Object.assign([], asyncRoutes)
-          generateMenu(tempAsyncRoutes, loadMenuData)
-          let accessedRoutes
-          if (roles.includes('超级管理员')) {
-            accessedRoutes = tempAsyncRoutes || []
-          } else {
-            accessedRoutes = filterAsyncRoutes(tempAsyncRoutes, roles)
-          }
-          // 设置路由
-          commit('SET_ROUTES', accessedRoutes)
-          resolve(accessedRoutes)
+          accessedRoutes = filterAsyncRoutes(tempAsyncRoutes, roles)
         }
+        // 设置路由
+        commit('SET_ROUTES', accessedRoutes)
+        resolve(accessedRoutes)
       }).catch(error => {
         console.log(error)
       })
@@ -93,7 +89,7 @@ export function generateMenu(routes, data) {
       name: item.name,
       path: item.path === '#' ? item.id + '_key' : item.path,
       component: item.component === '#' ? Layout : (resolve) => require([`@/views${item.component}`], resolve),
-      hidden: item.hidden !== '0',
+      hidden: item.hidden,
       meta: { 'icon': item.icon, 'title': item.title, 'keepAlive': true },
       children: []
     }

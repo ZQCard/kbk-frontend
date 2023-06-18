@@ -1,4 +1,4 @@
-import { login, logout, getInfo, loginSuccess } from '@/api/user'
+import { login, logout, getInfo } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { getRoleMenuBtn } from '@/api/auth/role'
 import router, { resetRouter } from '@/router'
@@ -39,9 +39,8 @@ const actions = {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password }).then(response => {
-        const { data } = response
-        commit('SET_TOKEN', data.token)
-        setToken(data.token)
+        commit('SET_TOKEN', response.token)
+        setToken(response.token)
         resolve()
       }).catch(error => {
         reject(error)
@@ -53,7 +52,7 @@ const actions = {
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
       getInfo(state.token).then(response => {
-        const { data } = response
+        var data = response
 
         if (!data) {
           reject('Verification failed, please Login again.')
@@ -65,22 +64,16 @@ const actions = {
         if (!roles || roles.length <= 0) {
           reject('getInfo: roles must be a non-null array!')
         }
-        // 获取数据成功请求后台保存登录数据
-        loginSuccess()
 
         // 获取角色按钮权限id集合
         getRoleMenuBtn({ role_name: roles[0] }).then(response => {
-          let data = response
-          if (response.code !== 0) {
-            throw new Error('按钮权限数据加载异常')
-          } else {
-            const menuBtnIdentifiers = []
-            response.data.list.forEach(item => {
+          let data = response.list
+          const menuBtnIdentifiers = []
+            response.list.forEach(item => {
               menuBtnIdentifiers.push(item.identifier)
             });
             // 设置按钮
             commit('SET_BUTTONS', menuBtnIdentifiers)
-          }
         }).catch(error => {
           console.log(error)
         })

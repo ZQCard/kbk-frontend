@@ -9,14 +9,7 @@ export function login(data) {
 
 export function getInfo(token) {
   return request({
-    url: '/admin/v1/getAdministratorInfo',
-    method: 'get'
-  })
-}
-
-export function loginSuccess() {
-  return request({
-    url: '/admin/v1/loginSuccess',
+    url: '/admin/v1/administratorInfo',
     method: 'get'
   })
 }

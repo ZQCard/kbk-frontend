@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getRoleMenu(params) {
   return request({
-    url: '/authorization/v1/roleMenuTree',
+    url: '/admin/v1/authorization/roleMenuTree',
     method: 'get',
     params
   })
@@ -10,7 +10,7 @@ export function getRoleMenu(params) {
 
 export function getBaseMenuTree(params) {
   return request({
-    url: '/authorization/v1/menuTree',
+    url: '/admin/v1/authorization/menuTree',
     method: 'get',
     params
   })
@@ -19,7 +19,7 @@ export function getBaseMenuTree(params) {
 
 export function createMenu(data) {
   return request({
-    url: '/authorization/v1/menu',
+    url: '/admin/v1/authorization/menu',
     method: 'post',
     data
   })
@@ -27,7 +27,7 @@ export function createMenu(data) {
 
 export function updateMenu(data) {
   return request({
-    url: '/authorization/v1/menu',
+    url: '/admin/v1/authorization/menu',
     method: 'put',
     data
   })
@@ -35,7 +35,7 @@ export function updateMenu(data) {
 
 export function deleteMenu(params) {
   return request({
-    url: '/authorization/v1/menu',
+    url: '/admin/v1/authorization/menu',
     method: 'delete',
     params
   })
