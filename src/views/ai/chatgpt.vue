@@ -43,7 +43,7 @@
 <script>
 import waves from '@/directive/waves' // waves directive
 import { createGptMessage } from '@/api/ai/chatgpt'
-
+import axios from 'axios';
 export default {
     name: 'chatgpt',
     directives: { waves },
@@ -53,7 +53,6 @@ export default {
             chatGPT: 'chatGPT',
             loding: false,
             tmp: {
-                model: "gpt-3.5-turbo",
                 messages: [
 
                 ],
@@ -87,39 +86,53 @@ export default {
             this.messages.push({
                 icon: 'beebot',
                 role: this.chatGPT,
-                content: '请稍等，信息正在传输中...'
+                content: ''
             })
 
-            if (this.systemInput != "") {
-                this.tmp.messages.forEach(function (message) {
-                    if (message.role !== 'system') {
-                        this.tmp.messages.unshift({
-                            role: 'system',
-                            content: this.systemInput
-                        })
-                    }
-                });
-            }
             this.tmp.messages.push({
                 role: 'user',
                 content: this.userInput
             })
-            createGptMessage(this.tmp).then(response => {
-                this.loding = false
-                this.messages.pop()
-                this.messages.push({
-                    icon: 'beebot',
-                    role: this.chatGPT,
-                    content: response.choices[0].message.content
-                })
+            if (this.systemInput != "") {
+                if (this.tmp.messages[0].role !== 'system') {
+                    this.tmp.messages.unshift({
+                            role: 'system',
+                            content: this.systemInput
+                        })
+                }
+            }
+            const socket = new WebSocket('ws://47.251.20.209:8888/ws');
+            socket.onopen = () => {
+                socket.send(JSON.stringify(this.tmp.messages));
+            };
+
+            socket.onmessage = (event) => {
+                // 处理收到的响应
+                this.messages[this.messages.length - 1].content += event.data
+            };
+            socket.onclose = () => {
                 this.tmp.messages.push({
                     role: 'assistant',
-                    content: response.choices[0].message.content
+                    content: this.messages[this.messages.length - 1].content
                 })
-            })
-
-            this.userInput = ""
-
+                this.loding = false;
+                this.userInput = '';
+                // 连接断开时的处理
+                console.log('连接已断开');
+            };
+            // createGptMessage(this.tmp).then(response => {
+            //     this.loding = false
+            //     this.messages.pop()
+            //     this.messages.push({
+            //         icon: 'beebot',
+            //         role: this.chatGPT,
+            //         content: response.choices[0].message.content
+            //     })
+            //     this.tmp.messages.push({
+            //         role: 'assistant',
+            //         content: response.choices[0].message.content
+            //     })
+            // })
         }
     }
 }

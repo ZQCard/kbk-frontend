@@ -38,7 +38,7 @@ module.exports = {
     },
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8000/', // 后端地址
+        target: 'http://127.0.0.1:8000', // 后端地址
         changeOrigin: true, // 开启代理，在本地创建一个虚拟服务端
         pathRewrite: {
           '^/api': '/'

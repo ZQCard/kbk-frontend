@@ -45,12 +45,8 @@
       
       <div style="position:relative">
         <div class="tips">
-          <span>超级管理员 : </span>
-          <span> admin</span>
-        </div>
-        <div class="tips">
           <span>权限测试管理员 : </span>
-          <span> test</span>
+          <span> testAdmin</span>
         </div>
         <div class="tips">
           <span>游客 : </span>
