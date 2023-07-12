@@ -2,7 +2,7 @@
   <div class="app-container">
     <div class="filter-container">
       <el-button class="filter-item" type="primary" icon="el-icon-plus" @click="handleCreate"
-        v-if="checkBtnPermission('createAdministrator')">
+        v-if="checkBtnPermission('createUser')">
         新增
       </el-button>
 
@@ -37,11 +37,6 @@
           <span>{{ row.username }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="当前角色" prop="role" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.role }}</span>
-        </template>
-      </el-table-column>
       <el-table-column label="手机号" prop="mobile" align="center">
         <template slot-scope="{row}">
           <span>{{ row.mobile }}</span>
@@ -59,50 +54,40 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="登录时间" prop="lastLoginTime" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.lastLoginTime | timeToDay }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="登录ip" prop="lastLoginIp" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.lastLoginIp }}</span>
-        </template>
-      </el-table-column>
       <el-table-column label="创建时间" prop="createdAt" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.createdAt | timeToDay }}</span>
+          <span>{{ row.createdAt}}</span>
         </template>
       </el-table-column>
       <el-table-column label="更新时间" prop="updatedAt" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.updatedAt | timeToDay }}</span>
+          <span>{{ row.updatedAt}}</span>
         </template>
       </el-table-column>
       <el-table-column label="删除时间" prop="updatedAt" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.deletedAt | timeToDay }}</span>
+          <span>{{ row.deletedAt }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="250" class-name="small-padding fixed-width">
         <template slot-scope="{row,$index}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)"
-            v-if="checkBtnPermission('updateAdministrator')">
+            v-if="checkBtnPermission('updateUser')">
             编辑
           </el-button>
-          <el-button v-if="row.deletedAt == '' && checkBtnPermission('deleteRecoverAdministrator')" size="mini"
+          <el-button v-if="row.deletedAt == '' && checkBtnPermission('deleteRecoverUser')" size="mini"
             type="danger" @click="handleDelete(row, $index)">
             删除
           </el-button>
-          <el-button v-if="row.deletedAt != '' && checkBtnPermission('deleteRecoverAdministrator')" size="mini"
+          <el-button v-if="row.deletedAt != '' && checkBtnPermission('deleteRecoverUser')" size="mini"
             type="success" @click="handleRecover(row, $index)">
             恢复
           </el-button>
-          <el-button v-if="row.status == true && checkBtnPermission('forbidAApproveAdministrator')" size="mini"
+          <el-button v-if="row.status == true && checkBtnPermission('forbidAApproveUser')" size="mini"
             type="warning" @click="handleForbid(row, $index)">
             禁用
           </el-button>
-          <el-button v-if="row.status == false && checkBtnPermission('forbidAApproveAdministrator')" size="mini"
+          <el-button v-if="row.status == false && checkBtnPermission('forbidAApproveUser')" size="mini"
             type="success" @click="handleApprove(row, $index)">
             解禁
           </el-button>
@@ -144,12 +129,6 @@
             <el-option v-for="item in statusOptions" :key="item.key" :label="item.display_name" :value="item.key" />
           </el-select>
         </el-form-item>
-        <el-form-item label="角色" prop="role">
-          <el-cascader v-model="selectedRoles" :options="roleOptions" style="width:100%"
-            :props="{ multiple: true, checkStrictly: true, label: 'name', value: 'name', emitPath: 'true' }"
-            :show-all-levels="false" @change="handleChange">
-          </el-cascader>
-        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
@@ -164,8 +143,7 @@
 </template>
   
 <script>
-import { listAdministrator, createAdministrator, updateAdministrator, deleteAdministrator, recoverAdministrator, forbidAdministrator, approveAdministrator } from '@/api/administrator'
-import { listRole, getAdministratorRole } from '@/api/auth/role'
+import { listUser, createUser, updateUser, deleteUser, recoverUser, forbidUser, approveUser } from '@/api/user'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import { getDate, parseTime } from '@/utils/index.js'
@@ -203,17 +181,10 @@ export default {
       }
       return statusMap[status]
     },
-    timeToDay(times) {
-      return times.slice(0, 10)
-    },
   },
   data() {
     return {
       selectedRoles: [],
-      roleList: [],
-      roleOptions: [
-
-      ],
       isDisabled: false,
       createdSearch: '',
       statusOptions,
@@ -238,7 +209,6 @@ export default {
         nickname: undefined,
         avatar: undefined,
         status: undefined,
-        role: undefined,
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -259,20 +229,12 @@ export default {
   },
   created() {
     this.getList()
-    this.getRoleList()
   },
   methods: {
     checkBtnPermission,
-    getRoleList() {
-      this.listLoading = true
-      listRole(this.listQuery).then(response => {
-        this.roleList = response.list
-        this.listLoading = false
-      })
-    },
     getList() {
       this.listLoading = true
-      listAdministrator(this.listQuery).then(response => {
+      listUser(this.listQuery).then(response => {
         this.list = response.list
         this.total = parseInt(response.total)
         this.listLoading = false
@@ -307,7 +269,6 @@ export default {
         nickname: undefined,
         avatar: undefined,
         status: undefined,
-        role: undefined,
       }
     },
     handleCreate() {
@@ -324,7 +285,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           this.temp.id = 0
-          createAdministrator(this.temp).then(response => {
+          createUser(this.temp).then(response => {
             this.list.push(response)
             this.dialogFormVisible = false
             this.$notify({
@@ -339,18 +300,6 @@ export default {
       })
     },
     handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
-      // 获取当前管理员的角色列表
-      getAdministratorRole({ username: row.username }).then(response => {
-        const temp = [];
-        response.roles.forEach(element => {
-          console.log(element)
-          temp.push([element])
-        });
-        this.temp.role = response.roles
-        this.selectedRoles = temp
-      })
-
       this.isDisabled = true;
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
@@ -363,7 +312,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateAdministrator(tempData).then(() => {
+          updateUser(tempData).then(() => {
             const index = this.list.findIndex(v => v.id === this.temp.id)
             this.list.splice(index, 1, this.temp)
             this.dialogFormVisible = false
@@ -379,7 +328,7 @@ export default {
       })
     },
     handleDelete(row, index) {
-      deleteAdministrator({ id: row.id }).then(() => {
+      deleteUser({ id: row.id }).then(() => {
         this.list[index].deletedAt = getDate()
         this.$notify({
           title: 'Success',
@@ -390,7 +339,7 @@ export default {
       })
     },
     handleRecover(row, index) {
-      recoverAdministrator({ id: row.id }).then(() => {
+      recoverUser({ id: row.id }).then(() => {
         this.list[index].deletedAt = ""
         this.$notify({
           title: 'Success',
@@ -401,18 +350,18 @@ export default {
       })
     },
     handleForbid(row, index) {
-      forbidAdministrator({ id: row.id }).then(() => {
+      forbidUser({ id: row.id }).then(() => {
         this.list[index].status = false
         this.$notify({
           title: 'Success',
-          message: '恢复成功',
+          message: '禁用成功',
           type: 'success',
           duration: 2000
         })
       })
     },
     handleApprove(row, index) {
-      approveAdministrator({ id: row.id }).then(() => {
+      approveUser({ id: row.id }).then(() => {
         this.list[index].status = true
         this.$notify({
           title: 'Success',
@@ -421,42 +370,6 @@ export default {
           duration: 2000
         })
       })
-    },
-    handleChange(value) {
-      this.temp.role = [];
-      value.forEach(element => {
-        this.temp.role.push(element[0])
-      });
-    },
-    setOptions() {
-      this.roleOptions = [
-
-      ]
-      this.setRoleOptions(this.roleList, this.roleOptions)
-    },
-    setRoleOptions(dataList, optionsData) {
-      this.temp.id = String(this.temp.id)
-      dataList &&
-        dataList.forEach(item => {
-          if (item.children && item.children.length) {
-            const option = {
-              id: item.id,
-              name: item.name,
-              children: []
-            }
-            this.setRoleOptions(
-              item.children,
-              option.children,
-            )
-            optionsData.push(option)
-          } else {
-            const option = {
-              id: item.id,
-              name: item.name,
-            }
-            optionsData.push(option)
-          }
-        })
     },
     beforeAvatarUpload(file) {
       const isLt2M = file.size / 1024 / 1024 < 2
